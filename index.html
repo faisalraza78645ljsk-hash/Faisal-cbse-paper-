@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d19">
+<title>Faisal CBSE Papers</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d19;color:#f5f5f5;font-family:Arial,sans-serif}
+header{padding:25px 18px;background:#101827;border-bottom:1px solid #b99a4b}
+h1{color:#e6c875;margin:8px 0;font-size:28px}
+p{color:#aeb8c8;line-height:1.5}
+main{max-width:850px;margin:auto;padding:20px 16px}
+input,select,button{font:inherit;border-radius:12px;padding:13px;border:1px solid #30394b}
+input,select{background:#111a2a;color:white;width:100%;margin:7px 0}
+button{cursor:pointer;background:#172238;color:white}
+button:focus,input:focus{outline:2px solid #e6c875}
+.gold{background:#d8b75e;color:#101010;font-weight:bold;border:0}
+.classes,.subjects,.categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.card{padding:17px;background:#111a2a;border:1px solid #283449;border-radius:16px}
+.card h3{margin:5px 0 10px}
+.card p{font-size:13px}
+h2{margin-top:28px}
+.hidden{display:none}
+.paper{margin:12px 0;padding:15px;border:1px solid #30394b;border-radius:14px;background:#111a2a}
+.paper a{display:inline-block;margin:5px 5px 0 0;text-decoration:none}
+a button{background:#d8b75e;color:#101010;border:0;font-weight:bold}
+footer{text-align:center;color:#8993a5;padding:25px}
+@media(max-width:400px){.classes,.subjects,.categories{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div>📚 FAISAL CBSE PAPERS</div>
+  <h1>Your Smart Study Hub</h1>
+  <p>Class 11 & 12 • Sample Papers • Previous Year Papers</p>
+</header>
+<main>
+  <input id="search" placeholder="Search subject, paper or year..." aria-label="Search papers">
+  <h2>Choose Your Class</h2>
+  <div class="classes">
+    <button class="card gold" onclick="chooseClass('11')">CLASS 11</button>
+    <button class="card gold" onclick="chooseClass('12')">CLASS 12</button>
+  </div>
+  <h2 id="classTitle">Select a class</h2>
+  <div class="subjects" id="subjects"></div>
+  <h2>Paper Categories</h2>
+  <div class="categories" id="categories"></div>
+  <h2 id="paperTitle">Study Materials</h2>
+  <div id="papers">
+    <p>Select a class, subject and category to find papers.</p>
+  </div>
+  <p>PDF links are added by the website owner. Verify the source and academic year before using any paper.</p>
+</main>
+<footer>© Faisal CBSE Papers</footer>
+<script>
+const subjects = [
+  ["Physics","⚛️"],["Chemistry","🧪"],["Mathematics","📐"],
+  ["Biology","🧬"],["English","📖"]
+];
+const categories = [
+  "Previous Year Papers","CBSE Sample Papers","Model Papers",
+  "Important Questions","Chapter-Wise Questions","Answer Keys & Solutions"
+];
+
+// Add verified Google Drive PDF links here.
+// Replace each example URL with a real, public PDF link.
+const papers = [
+  // Example:
+  // {class:"12",subject:"Physics",category:"CBSE Sample Papers",
+  //  year:"2025",title:"Physics Sample Paper 2025",
+  //  url:"https://drive.google.com/file/d/FILE_ID/view"}
+];
+
+let selectedClass="",selectedSubject="",selectedCategory="";
+const subjectBox=document.getElementById("subjects");
+const categoryBox=document.getElementById("categories");
+
+function chooseClass(c){
+ selectedClass=c;
+ selectedSubject="";
+ selectedCategory="";
+ document.getElementById("classTitle").textContent="Class "+c+" Subjects";
+ renderSubjects();
+ renderCategories();
+ renderPapers();
+}
+function renderSubjects(){
+ subjectBox.innerHTML="";
+ subjects.forEach(([name,emoji])=>{
+  const b=document.createElement("button");
+  b.className="card";
+  b.textContent=emoji+" "+name;
+  b.onclick=()=>{
+   selectedSubject=name;
+   renderSubjects();
+   renderPapers();
+  };
+  if(selectedSubject===name)b.style.borderColor="#e6c875";
+  subjectBox.appendChild(b);
+ });
+}
+function renderCategories(){
+ categoryBox.innerHTML="";
+ categories.forEach(name=>{
+  const b=document.createElement("button");
+  b.textContent=name;
+  b.onclick=()=>{
+   selectedCategory=name;
+   renderCategories();
+   renderPapers();
+  };
+  if(selectedCategory===name)b.style.borderColor="#e6c875";
+  categoryBox.appendChild(b);
+ });
+}
+function renderPapers(){
+ const q=document.getElementById("search").value.toLowerCase();
+ const list=papers.filter(p=>
+  (!selectedClass||p.class===selectedClass)&&
+  (!selectedSubject||p.subject===selectedSubject)&&
+  (!selectedCategory||p.category===selectedCategory)&&
+  (p.title+" "+p.subject+" "+p.year+" "+p.category).toLowerCase().includes(q)
+ );
+ const box=document.getElementById("papers");
+ box.innerHTML="";
+ document.getElementById("paperTitle").textContent=
+  (selectedSubject||"Study")+" Materials";
+ if(!list.length){
+  box.innerHTML="<p>No papers added yet. Verified PDF links can be added to the paper database.</p>";
+  return;
+ }
+ list.forEach(p=>{
+  const item=document.createElement("div");
+  item.className="paper";
+  const title=document.createElement("h3");
+  title.textContent=p.title;
+  const info=document.createElement("p");
+  info.textContent="Class "+p.class+" • "+p.subject+" • "+p.year;
+  item.append(title,info);
+  if(p.url&&p.url.startsWith("https://drive.google.com/")){
+   const view=document.createElement("a");
+   view.href=p.url;view.target="_blank";view.rel="noopener";
+   view.appendChild(document.createElement("button"));
+   view.firstChild.textContent="View PDF";
+   item.appendChild(view);
+   const share=document.createElement("button");
+   share.textContent="Copy PDF Link";
+   share.onclick=async()=>{
+    try{await navigator.clipboard.writeText(p.url);share.textContent="Copied";}
+    catch(e){prompt("Copy this link:",p.url);}
+   };
+   item.appendChild(share);
+  }else{
+   const note=document.createElement("p");
+   note.textContent="PDF link not available";
+   item.appendChild(note);
+  }
+  box.appendChild(item);
+ });
+}
+document.getElementById("search").addEventListener("input",renderPapers);
+renderCategories();
+</script>
+</body>
+</html>
